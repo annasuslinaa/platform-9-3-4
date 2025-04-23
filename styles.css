@@ -28,8 +28,24 @@ body {
     color: white;
   }
   
-  .main-buttons .button,
-  .tariff-box {
+  .main-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 320px;
+    align-items: center;
+  }
+  
+  .bottom-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .button {
     background-color: rgba(255, 255, 255, 0.9);
     color: #000;
     padding: 15px 20px;
@@ -44,17 +60,9 @@ body {
     font-weight: 500;
   }
   
-  .main-buttons .button:hover {
+  .button:hover {
     background-color: rgba(255, 0, 0, 0.8);
     color: #fff;
-  }
-  
-  .bottom-buttons {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
   }
   
   .tariff-section,
@@ -86,4 +94,3 @@ body {
     margin-top: 4px;
     color: #333;
   }
-  
