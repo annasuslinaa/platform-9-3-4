@@ -1,109 +1,78 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Platform 9¾ VPN</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #2C1A1A; /* Темно-красный фон */
-            color: white;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform VPN</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: url('u1682615412_httpss.mj.runRJrvAcCVOGQ_Abstract_soft_background_db546339-b3d8-491b-99ec-0215510d983f_3.png') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-        .header {
-            font-size: 30px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #FFD700; /* Золотистый цвет */
-        }
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 4px;
+    }
 
-        .status {
-            font-size: 18px;
-            margin-bottom: 30px;
-        }
+    .subtitle {
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 40px;
+    }
 
-        .button {
-            background-color: #9C1A1A; /* Более насыщенный красный */
-            color: white;
-            padding: 12px 20px;
-            margin: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(10px);
+    }
 
-        .button:hover {
-            background-color: #FFD700; /* Золотистый при наведении */
-            color: black;
-        }
+    .btn {
+      background-color: white;
+      color: black;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
 
-        .footer {
-            font-size: 14px;
-            color: #FFD700; /* Золотистый для текста */
-            margin-top: 20px;
-        }
+    .btn:hover {
+      background-color: #eeeeee;
+    }
 
-        .subscription {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .subscription a {
-            color: #FFD700;
-            text-decoration: none;
-        }
-
-        .subscription a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    .row {
+      display: flex;
+      gap: 16px;
+    }
+  </style>
 </head>
 <body>
-    <div class="header">Platform 9¾ VPN</div>
-    <div class="status" id="vpnStatus">VPN Offline</div>
+  <div class="title">Platform</div>
+  <div class="subtitle">VPN</div>
 
-    <button class="button" id="connectBtn">Подключиться к VPN</button>
-    <button class="button" id="subscribeBtn">Купить подписку</button>
-
-    <div class="subscription">
-        <p>Пробный период до 21 апреля 2025</p>
-        <a href="#">Установка и настройка для iOS</a>
+  <div class="card">
+    <button class="btn">Купить подписку</button>
+    <button class="btn">Установка и настройка</button>
+    <div class="row">
+      <button class="btn" style="flex: 1">Профиль</button>
+      <button class="btn" style="flex: 1">Поддержка</button>
     </div>
-
-    <div class="footer">
-        <p>Поддержка</p>
-    </div>
-
-    <script>
-        const vpnStatus = document.getElementById('vpnStatus');
-        const connectBtn = document.getElementById('connectBtn');
-        const subscribeBtn = document.getElementById('subscribeBtn');
-
-        // Обработчик для подключения/отключения VPN
-        connectBtn.addEventListener('click', function() {
-            if (vpnStatus.innerText === 'VPN Offline') {
-                vpnStatus.innerText = 'VPN Online';
-                connectBtn.innerText = 'Отключиться от VPN';
-            } else {
-                vpnStatus.innerText = 'VPN Offline';
-                connectBtn.innerText = 'Подключиться к VPN';
-            }
-        });
-
-        // Обработчик для подписки
-        subscribeBtn.addEventListener('click', function() {
-            alert("Перейдите на страницу для покупки подписки.");
-        });
-    </script>
+  </div>
 </body>
 </html>
-
