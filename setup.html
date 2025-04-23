@@ -1,38 +1,45 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Установка</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Установка</title>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="container">
-    <h2 id="platform-title">Настройка для ...</h2>
-    <button class="button">На этом устройстве</button>
-    <br />
-    <button class="button">На другом устройстве</button>
-  </div>
+    <div class="container">
+        <h2 id="platform-title">Настройка для ...</h2>
+        <button class="button">На этом устройстве</button>
+        <br />
+        <button class="button">На другом устройстве</button>
+    </div>
 
-  <script>
-    const title = document.getElementById("platform-title");
-    const userAgent = navigator.userAgent;
+    <script>
+        const title = document.getElementById("platform-title");
+        const userAgent = navigator.userAgent;
 
-    let platform = "вашего устройства";
+        let platform = "вашего устройства";
 
-    if (/iPhone|iPad|iPod/i.test(userAgent)) {
-      platform = "iOS";
-    } else if (/Macintosh/i.test(userAgent)) {
-      platform = "Mac OS";
-    } else if (/Windows/i.test(userAgent)) {
-      platform = "Windows";
-    } else if (/Android/i.test(userAgent)) {
-      platform = "Android";
-    } else if (/Linux/i.test(userAgent)) {
-      platform = "Linux";
-    }
+        if (/iPhone|iPad|iPod/i.test(userAgent)) {
+            platform = "iOS";
+        } else if (/Macintosh/i.test(userAgent)) {
+            platform = "Mac OS";
 
-    title.innerText = `Настройка для ${platform}`;
-  </script>
+            // Определяем, если это Intel или Apple Silicon
+            if (/Intel/i.test(userAgent)) {
+                platform = "Mac OS (Intel)";
+            } else if (/Apple/i.test(userAgent) && /M1|M2/i.test(userAgent)) {
+                platform = "Mac OS (Apple Silicon)";
+            }
+        } else if (/Windows/i.test(userAgent)) {
+            platform = "Windows";
+        } else if (/Android/i.test(userAgent)) {
+            platform = "Android";
+        } else if (/Linux/i.test(userAgent)) {
+            platform = "Linux";
+        }
+
+        title.innerText = `Настройка для ${platform}`;
+    </script>
 </body>
 </html>
