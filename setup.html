@@ -16,31 +16,23 @@
 
   <script>
     const title = document.getElementById("platform-title");
-    const link = document.getElementById("download-link");
 
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     let platform = "вашего устройства";
-    let downloadURL = "#";
 
     if (/iPhone|iPad|iPod/i.test(userAgent)) {
       platform = "iOS";
-      downloadURL = "https://example.com/ios";
     } else if (/Android/i.test(userAgent)) {
       platform = "Android";
-      downloadURL = "https://example.com/android";
     } else if (/Macintosh/i.test(userAgent)) {
       platform = "Mac OS";
-      downloadURL = "https://example.com/macos";
     } else if (/Windows/i.test(userAgent)) {
       platform = "Windows";
-      downloadURL = "https://example.com/windows";
     } else if (/Linux/i.test(userAgent)) {
       platform = "Linux";
-      downloadURL = "https://example.com/linux";
     }
 
     title.innerText = `Настройка для ${platform}`;
-    link.href = downloadURL;
   </script>
 </body>
 </html>
