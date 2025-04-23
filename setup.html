@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Установка</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2 id="platform-title">Настройка для ...</h2>
+    <button class="button">На этом устройстве</button>
+    <br />
+    <button class="button">На другом устройстве</button>
+  </div>
+
+  <script>
+    const title = document.getElementById("platform-title");
+    const userAgent = navigator.userAgent;
+
+    let platform = "вашего устройства";
+
+    if (/iPhone|iPad|iPod/i.test(userAgent)) {
+      platform = "iOS";
+    } else if (/Macintosh/i.test(userAgent)) {
+      platform = "Mac OS";
+    } else if (/Windows/i.test(userAgent)) {
+      platform = "Windows";
+    } else if (/Android/i.test(userAgent)) {
+      platform = "Android";
+    } else if (/Linux/i.test(userAgent)) {
+      platform = "Linux";
+    }
+
+    title.innerText = `Настройка для ${platform}`;
+  </script>
+</body>
+</html>
