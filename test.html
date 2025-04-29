@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>PlatformVPN Test</title>
+</head>
+<body>
+  <h2>🔑 Тест генерации ключа</h2>
+  <button onclick="generateKey()">Запросить ключ</button>
+  <pre id="output"></pre>
+
+  <script>
+    async function generateKey() {
+      const output = document.getElementById("output");
+      output.textContent = "⏳ Отправляем запрос...";
+
+      try {
+        const res = await fetch("https://platformvpn.ru/generate-key", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ tg_id: "testuser123" })
+        });
+
+        const data = await res.json();
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = "❌ Ошибка запроса: " + err;
+      }
+    }
+  </script>
+</body>
+</html>
