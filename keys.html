@@ -10,9 +10,29 @@
   <div class="container">
     <h2>Загрузите ключи Platforma в приложение</h2>
     <div class="bottom-buttons">
-      <button class="button">Загрузить</button>
+      <button class="button" id="generate-key-btn">Загрузить</button>
       <button class="button" onclick="location.href='next-step.html'">Далее</button>
     </div>
   </div>
+
+  <script>
+    document.getElementById("generate-key-btn").addEventListener("click", async () => {
+      const tg_id = "testuser123"; // временно, заменим позже на реальный
+      try {
+        const res = await fetch("https://platformvpn.ru/generate-key", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ tg_id })
+        });
+
+        const data = await res.json();
+        alert("✅ Ваш ключ:\n" + JSON.stringify(data, null, 2));
+      } catch (err) {
+        alert("❌ Ошибка запроса: " + err);
+      }
+    });
+  </script>
 </body>
 </html>
