@@ -8,17 +8,13 @@
 </head>
 <body>
   <div class="container">
-    <h2>Загрузите ключи Platforma в приложение</h2>
-    <div class="bottom-buttons">
-      <button class="button" id="generate-key-btn">Загрузить ключ</button>
-      <a class="button" id="open-in-app" href="#" style="display:none" target="_blank">Открыть в приложении</a>
-      <button class="button" onclick="location.href='next-step.html'">Далее</button>
-    </div>
+    <h2>Загрузите ключ Platforma в приложение</h2>
+    <button class="button" id="load-button">Загрузить</button>
   </div>
 
   <script>
-    document.getElementById("generate-key-btn").addEventListener("click", async () => {
-      const tg_id = "testuser123"; // тут потом подставим реальный Telegram ID
+    document.getElementById("load-button").addEventListener("click", async () => {
+      const tg_id = "tes12345"; // заменить на реальный TG ID позже
 
       try {
         const res = await fetch("https://platformvpn.ru/generate-key", {
@@ -30,17 +26,14 @@
         });
 
         const data = await res.json();
-        alert(data.message);
 
-        const uuid = data.uuid;
-        const vlessLink = `vless://${uuid}@178.62.198.20:34913?encryption=none&security=reality&pbk=CSaArmkEkADTafoZNYLaFxaDVjZEaHIKAoONt79IVR8&sni=178.62.198.20&fp=random&type=tcp&flow=xtls-rprx-vision&alpn=h2#PlatformVPN`;
-
-        const openBtn = document.getElementById("open-in-app");
-        openBtn.href = vlessLink;
-        openBtn.style.display = "block";
-
+        if (data.success && data.smart_link) {
+          window.location.href = data.smart_link;
+        } else {
+          alert("❌ Не удалось получить smart_link");
+        }
       } catch (err) {
-        alert("❌ Ошибка при генерации ключа: " + err);
+        alert("❌ Ошибка запроса: " + err);
       }
     });
   </script>
