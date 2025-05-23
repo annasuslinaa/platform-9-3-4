@@ -9,31 +9,44 @@
 </head>
 <body>
   <div class="container">
-    <h2>Загрузите ключ Platforma в приложение</h2>
-    <button class="button" id="load-button">Загрузить</button>
+    <h2>Загрузите ключи Platforma в приложение</h2>
+    <div class="bottom-buttons">
+      <button class="button" id="load-button">Загрузить</button>
+      <button class="button" onclick="location.href='next-step.html'">Далее</button>
+    </div>
   </div>
 
   <script>
     Telegram.WebApp.ready();
 
+    const userAgent = navigator.userAgent.toLowerCase();
+    let schemePrefix = null;
+
+    if (userAgent.includes("iphone") || userAgent.includes("android")) {
+      schemePrefix = "v2raytun://import/";
+    } else if (userAgent.includes("macintosh")) {
+      schemePrefix = "happ://import/";
+    }
+
     document.getElementById("load-button").addEventListener("click", async () => {
-      const tg_id = "tes12345"; // заменишь позже на реальный Telegram ID
+      const tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
 
       try {
         const res = await fetch("https://platformvpn.ru/generate-key", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ tg_id })
         });
 
         const data = await res.json();
 
-        if (data.success && data.smart_link) {
-          window.location.href = data.smart_link;
+        if (data.success && data.vless_url && schemePrefix) {
+          const stripped = data.vless_url.replace("vless://", "");
+          const encoded = encodeURIComponent(stripped);
+          const redirectLink = `https://platformvpn.ru/redirect?url=${schemePrefix}${encoded}`;
+          window.location.href = redirectLink;
         } else {
-          alert("❌ Не удалось получить smart_link");
+          alert("❌ Не удалось получить ключ или схема не поддерживается");
         }
       } catch (err) {
         alert("❌ Ошибка запроса: " + err);
