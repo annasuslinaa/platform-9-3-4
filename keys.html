@@ -41,17 +41,16 @@
           const uuid = data.uuid;
 
           if (userAgent.includes("iphone") || userAgent.includes("android")) {
-            // iPhone/Android → напрямую схема, как у Ultima
-            const configUrl = `https://platformvpn.ru/configs/${uuid}.txt`;
-            const schemeUrl = `v2raytun://import/${configUrl}`;
-            window.location.href = schemeUrl;
+            // iOS/Android — открываем промежуточную страницу с кнопкой
+            const launcherUrl = `https://platformvpn.ru/link-launcher.html?uuid=${uuid}`;
+            Telegram.WebApp.openLink(launcherUrl);
 
           } else if (userAgent.includes("macintosh")) {
-            // macOS → редирект на happ://
+            // macOS — редиректим на happ:// через бекенд
             const stripped = data.vless_url.replace("vless://", "");
             const encoded = encodeURIComponent(stripped);
             const redirectLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
-            window.location.href = redirectLink;
+            Telegram.WebApp.openLink(redirectLink);
 
           } else {
             alert("❌ Неизвестная платформа");
