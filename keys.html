@@ -1,27 +1,20 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Загрузка ключей</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
-<body>
-  <div class="container">
-    <h2>Загрузите ключи Platforma в приложение</h2>
-    <div class="bottom-buttons">
-      <button class="button" id="load-button">Загрузить</button>
-      <button class="button" onclick="location.href='next-step.html'">Далее</button>
-    </div>
-  </div>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
   Telegram.WebApp.ready();
 
+  function detectPlatform() {
+    const ua = navigator.userAgent.toLowerCase();
+    if (/iphone|ipad|ipod/.test(ua)) return "ios";
+    if (/android/.test(ua)) return "android";
+    if (/macintosh/.test(ua)) return "mac";
+    return "unknown";
+  }
+
   document.getElementById("load-button").addEventListener("click", async () => {
     let tg_id = "testuser123";
+
+    if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+      tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
+    }
 
     try {
       const res = await fetch("https://platformvpn.ru/generate-key", {
@@ -31,21 +24,27 @@
       });
 
       const data = await res.json();
-      alert("Ответ от /generate-key:\n" + JSON.stringify(data, null, 2));
+      const platform = detectPlatform();
 
       if (data.success && data.uuid) {
-        const launcherUrl = `https://platformvpn.ru/link-launcher.html?uuid=${data.uuid}`;
-        alert("Открываем ссылку:\n" + launcherUrl);
-        Telegram.WebApp.openLink(launcherUrl);
+        if (platform === "ios" || platform === "android") {
+          const launcherUrl = `https://platformvpn.ru/bounce.html?uuid=${data.uuid}`;
+          Telegram.WebApp.openLink(launcherUrl);
+        } else if (platform === "mac") {
+          const stripped = data.vless_url.replace("vless://", "");
+          const encoded = encodeURIComponent(stripped);
+          const macLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
+          Telegram.WebApp.openLink(macLink);
+        } else {
+          alert("❌ Неизвестная платформа. Откройте на нужном устройстве.");
+        }
       } else {
-        alert("❌ Ключ не получен или UUID пустой");
+        alert("❌ Не удалось получить ключ.");
       }
 
     } catch (err) {
-      alert("💥 Ошибка запроса: " + err.message);
+      alert("💥 Ошибка: " + err.message);
+      console.error(err);
     }
   });
 </script>
-
-</body>
-</html>
