@@ -22,7 +22,7 @@
     const userAgent = navigator.userAgent.toLowerCase();
 
     document.getElementById("load-button").addEventListener("click", async () => {
-      let tg_id = "testuser123"; // fallback для браузера
+      let tg_id = "testuser123";
 
       if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
         tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
@@ -41,17 +41,17 @@
           const uuid = data.uuid;
 
           if (userAgent.includes("iphone") || userAgent.includes("android")) {
-            // iOS / Android → V2RayTun
+            // iPhone/Android → напрямую схема, как у Ultima
             const configUrl = `https://platformvpn.ru/configs/${uuid}.txt`;
-            const redirectLink = `v2raytun://import/${configUrl}`;
-            Telegram.WebApp.openLink(redirectLink);
+            const schemeUrl = `v2raytun://import/${configUrl}`;
+            window.location.href = schemeUrl;
 
           } else if (userAgent.includes("macintosh")) {
-            // macOS → Happ
+            // macOS → редирект на happ://
             const stripped = data.vless_url.replace("vless://", "");
             const encoded = encodeURIComponent(stripped);
             const redirectLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
-            Telegram.WebApp.openLink(redirectLink);
+            window.location.href = redirectLink;
 
           } else {
             alert("❌ Неизвестная платформа");
