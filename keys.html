@@ -16,80 +16,75 @@
     </div>
   </div>
 
-  <script>
-    alert("📦 JS загружен");
+<!-- === ВЕСЬ СКРИПТ ПЕРЕНЕСЁН СЮДА === -->
+<script>
+  alert("📦 JS загружен");
 
-    document.addEventListener("DOMContentLoaded", () => {
-      alert("✅ DOMContentLoaded");
+  Telegram.WebApp.ready();
+  alert("📲 Telegram WebApp ready");
 
-      Telegram.WebApp.ready();
-      alert("📲 Telegram WebApp ready");
+  function detectPlatform() {
+    const ua = navigator.userAgent.toLowerCase();
+    console.log("🧠 userAgent:", ua);
+    if (/iphone|ipad|ipod/.test(ua)) return "ios";
+    if (/android/.test(ua)) return "android";
+    if (/macintosh/.test(ua)) return "mac";
+    return "unknown";
+  }
 
-      const btn = document.getElementById("load-button");
-      if (!btn) {
-        alert("❌ Кнопка не найдена!");
-        return;
+  const btn = document.getElementById("load-button");
+  if (!btn) {
+    alert("❌ Кнопка не найдена!");
+  } else {
+    alert("🟢 Кнопка найдена");
+
+    btn.addEventListener("click", async () => {
+      alert("✅ Кнопка нажата");
+
+      let tg_id = "testuser123";
+      if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
       }
 
-      alert("🟢 Кнопка найдена");
+      alert("📨 tg_id = " + tg_id);
 
-      function detectPlatform() {
-        const ua = navigator.userAgent.toLowerCase();
-        console.log("🧠 userAgent:", ua);
-        if (/iphone|ipad|ipod/.test(ua)) return "ios";
-        if (/android/.test(ua)) return "android";
-        if (/macintosh/.test(ua)) return "mac";
-        return "unknown";
-      }
+      try {
+        const res = await fetch("https://platformvpn.ru/generate-key", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tg_id })
+        });
 
-      btn.addEventListener("click", async () => {
-        alert("✅ Кнопка нажата");
+        const data = await res.json();
+        alert("🎯 Ответ от API: " + JSON.stringify(data));
 
-        let tg_id = "testuser123";
+        const platform = detectPlatform();
+        alert("🧠 Обнаружена платформа: " + platform);
 
-        if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-          tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
-        }
-
-        alert("📨 tg_id = " + tg_id);
-
-        try {
-          const res = await fetch("https://platformvpn.ru/generate-key", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ tg_id })
-          });
-
-          const data = await res.json();
-          alert("🎯 Ответ от API: " + JSON.stringify(data));
-
-          const platform = detectPlatform();
-          alert("🧠 Обнаружена платформа: " + platform);
-
-          if (data.success && data.uuid && data.vless_url) {
-            if (platform === "ios" || platform === "android") {
-              const launcherUrl = `https://platformvpn.ru/bounce.html?uuid=${data.uuid}`;
-              alert("🚀 Переход на: " + launcherUrl);
-              Telegram.WebApp.openLink(launcherUrl);
-            } else if (platform === "mac") {
-              const stripped = data.vless_url.replace("vless://", "");
-              const encoded = encodeURIComponent(stripped);
-              const macLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
-              alert("🚀 Переход на: " + macLink);
-              Telegram.WebApp.openLink(macLink);
-            } else {
-              alert("❌ Неизвестная платформа. Откройте на нужном устройстве.");
-            }
+        if (data.success && data.uuid && data.vless_url) {
+          if (platform === "ios" || platform === "android") {
+            const launcherUrl = `https://platformvpn.ru/bounce.html?uuid=${data.uuid}`;
+            alert("🚀 Переход на: " + launcherUrl);
+            Telegram.WebApp.openLink(launcherUrl);
+          } else if (platform === "mac") {
+            const stripped = data.vless_url.replace("vless://", "");
+            const encoded = encodeURIComponent(stripped);
+            const macLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
+            alert("🚀 Переход на: " + macLink);
+            Telegram.WebApp.openLink(macLink);
           } else {
-            alert("❌ API не вернул uuid или success=false");
+            alert("❌ Неизвестная платформа. Откройте на нужном устройстве.");
           }
-
-        } catch (err) {
-          alert("💥 Ошибка запроса: " + err.message);
-          console.error(err);
+        } else {
+          alert("❌ API не вернул uuid или success=false");
         }
-      });
+
+      } catch (err) {
+        alert("💥 Ошибка запроса: " + err.message);
+        console.error(err);
+      }
     });
-  </script>
+  }
+</script>
 </body>
 </html>
