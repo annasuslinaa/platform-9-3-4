@@ -29,12 +29,10 @@
     }
 
     document.getElementById("load-button").addEventListener("click", async () => {
-      let tg_id = "testuser123"; // fallback для теста в браузере
+      let tg_id = "testuser123"; // fallback
 
       if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
         tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
-      } else {
-        console.warn("⚠️ Telegram WebApp.initDataUnsafe.user.id не найден");
       }
 
       try {
@@ -50,7 +48,8 @@
           const stripped = data.vless_url.replace("vless://", "");
           const encoded = encodeURIComponent(stripped);
           const redirectLink = `https://platformvpn.ru/redirect?url=${schemePrefix}${encoded}`;
-          window.location.href = redirectLink;
+
+          Telegram.WebApp.openLink(redirectLink);
         } else {
           alert("❌ Не удалось получить ключ или схема не поддерживается");
         }
