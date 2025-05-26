@@ -63,7 +63,7 @@
 
         if (data.success && data.uuid && data.vless_url) {
           if (platform === "ios" || platform === "android") {
-            const launcherUrl = `https://platformvpn.ru/bounce.html?uuid=${data.uuid}`;
+            const launcherUrl = `https://bounce.platformvpn.ru/bounce.html?uuid=${data.uuid}`;
             alert("🚀 Переход на: " + launcherUrl);
             Telegram.WebApp.openLink(launcherUrl);
           } else if (platform === "mac") {
