@@ -61,9 +61,14 @@
           alert("🧠 Обнаружена платформа: " + platform);
 
           if (data.success && data.uuid && data.vless_url) {
-            if (platform === "ios" || platform === "android") {
+            if (platform === "android") {
+              // На Android — открываем сразу!
+              const configUrl = `https://platformvpn.ru/configs/${data.uuid}.txt`;
+              const deeplink = `v2raytun://import/${configUrl}`;
+              Telegram.WebApp.openLink(deeplink);
+            } else if (platform === "ios") {
+              // iOS — через bounce.html, пользователь жмёт кнопку сам
               const launcherUrl = `https://bounce.platformvpn.ru/bounce.html?uuid=${data.uuid}`;
-              alert("🚀 Переход на: " + launcherUrl);
               Telegram.WebApp.openLink(launcherUrl);
             } else if (platform === "mac") {
               const stripped = data.vless_url.replace("vless://", "");
