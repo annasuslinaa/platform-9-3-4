@@ -20,16 +20,9 @@
     Telegram.WebApp.ready();
 
     const userAgent = navigator.userAgent.toLowerCase();
-    let schemePrefix = null;
-
-    if (userAgent.includes("iphone") || userAgent.includes("android")) {
-      schemePrefix = "v2raytun://import/";
-    } else if (userAgent.includes("macintosh")) {
-      schemePrefix = "happ://import/";
-    }
 
     document.getElementById("load-button").addEventListener("click", async () => {
-      let tg_id = "testuser123"; // fallback
+      let tg_id = "testuser123"; // fallback для браузера
 
       if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
         tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
@@ -44,15 +37,30 @@
 
         const data = await res.json();
 
-        if (data.success && data.vless_url && schemePrefix) {
-          const stripped = data.vless_url.replace("vless://", "");
-          const encoded = encodeURIComponent(stripped);
-          const redirectLink = `https://platformvpn.ru/redirect?url=${schemePrefix}${encoded}`;
+        if (data.success && data.vless_url && data.uuid) {
+          const uuid = data.uuid;
 
-          Telegram.WebApp.openLink(redirectLink);
+          if (userAgent.includes("iphone") || userAgent.includes("android")) {
+            // iOS / Android → V2RayTun
+            const configUrl = `https://platformvpn.ru/configs/${uuid}.txt`;
+            const redirectLink = `v2raytun://import/${configUrl}`;
+            Telegram.WebApp.openLink(redirectLink);
+
+          } else if (userAgent.includes("macintosh")) {
+            // macOS → Happ
+            const stripped = data.vless_url.replace("vless://", "");
+            const encoded = encodeURIComponent(stripped);
+            const redirectLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
+            Telegram.WebApp.openLink(redirectLink);
+
+          } else {
+            alert("❌ Неизвестная платформа");
+          }
+
         } else {
-          alert("❌ Не удалось получить ключ или схема не поддерживается");
+          alert("❌ Не удалось получить ключ или данные некорректны");
         }
+
       } catch (err) {
         alert("❌ Ошибка запроса: " + err.message);
         console.error(err);
