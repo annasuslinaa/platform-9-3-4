@@ -1,316 +1,69 @@
-from db_utils import init_db, get_uuid_by_tg_id, save_user, get_expiry_by_tg_id, update_expiry_in_db
-from flask import Flask, request, jsonify, redirect
-from datetime import datetime, timedelta
-import uuid
-import requests
-import time
-import json
-import logging
-import traceback
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Загрузка ключей</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>Загрузите ключи Platforma в приложение</h2>
+    <div class="bottom-buttons">
+      <button class="button" id="load-button">Загрузить</button>
+      <button class="button" onclick="location.href='next-step.html'">Далее</button>
+    </div>
+  </div>
 
+  <script>
+    Telegram.WebApp.ready();
 
-app = Flask(__name__)
+    function detectPlatform() {
+      const ua = navigator.userAgent.toLowerCase();
+      if (/iphone|ipad|ipod/.test(ua)) return "ios";
+      if (/android/.test(ua)) return "android";
+      if (/macintosh/.test(ua)) return "mac";
+      return "unknown";
+    }
 
+    document.getElementById("load-button").addEventListener("click", async () => {
+      let tg_id = "testuser123";
+      if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
+      }
 
-# === Конфиги ===
-API_BASE = "http://178.62.198.20:54321/P2kGNvqkhq9dDt2/panel/api"
-LOGIN = "UxslbEu81t"
-PASSWORD = "kHWi2UbCWE"
-DOMAIN = "178.62.198.20"
-PORT = 34913
-PUBLIC_KEY = "uvnOU3LMB65JPi891aar91sfn6DaloFioVbd2TWbTGM"
+      try {
+        const res = await fetch("https://platformvpn.ru/generate-key", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tg_id })
+        });
+        const data = await res.json();
 
-logging.basicConfig(level=logging.INFO)
+        if (data.success && data.uuid && data.vless_url) {
+          const configUrl = `https://platformvpn.ru/configs/${data.uuid}.txt`;
+          const deeplink = `v2raytun://import/${configUrl}`;
+          const platform = detectPlatform();
 
-
-def get_cookie():
-    payload = {"username": LOGIN, "password": PASSWORD}
-    r = requests.post(API_BASE.replace("/panel/api", "/login"), data=payload)
-    if r.status_code == 200:
-        print("✅ Авторизация успешна")
-        return r.cookies.get_dict()
-    raise Exception("❌ Ошибка авторизации: " + r.text)
-
-
-@app.route("/generate-key", methods=["POST"])
-def generate_key():
-    tg_id = request.json.get("tg_id")
-    if not tg_id:
-        return jsonify({"error": "Telegram ID обязателен"}), 400
-
-    # Проверка, есть ли уже ключ
-    existing_uuid = get_uuid_by_tg_id(tg_id)
-    if existing_uuid:
-        vless_url = f"vless://{existing_uuid}@{DOMAIN}:{PORT}?type=tcp&security=reality&flow=xtls-rprx-vision&sni=yahoo.com&fp=chrome&pbk={PUBLIC_KEY}&sid=07&spx=%2F#PlatformVPN"
-
-        # сохраняем .txt для уже существующего UUID
-    try:
-        config_path = f"/var/www/html/configs/{existing_uuid}.txt"
-        with open(config_path, "w") as f:
-            f.write(vless_url)
-        logging.info(f"✅ Конфиг для существующего UUID сохранён: {config_path}")
-    except Exception as e:
-        logging.error(f"❌ Ошибка сохранения существующего VLESS-файла: {e}")
-
-    return jsonify({
-        "success": True,
-        "uuid": existing_uuid,
-        "vless_url": vless_url
-    })
-
-    try:
-        logging.info(f"🚀 Запрос на генерацию ключа для tg_id: {tg_id}")
-        cookies = get_cookie()
-        logging.info("✅ Куки получены")
-
-        # Получаем все inbounds
-        r = requests.get(f"{API_BASE}/inbounds/list", cookies=cookies)
-        logging.info("📡 Запрошены inbounds")
-        if r.status_code != 200:
-            return jsonify({"error": "Не удалось получить список inbounds"}), 500
-
-        inbounds = r.json().get("obj", [])
-        inbound = next((i for i in inbounds if i.get("port") == PORT), None)
-        if not inbound:
-            return jsonify({"error": f"Inbound с портом {PORT} не найден"}), 404
-
-        inbound_id = inbound.get("id")
-        logging.info(f"✅ Найден inbound: {inbound_id}")
-
-        settings = inbound.get("settings")
-        if isinstance(settings, str):
-            settings = json.loads(settings)
-
-        clients = settings.get("clients", [])
-
-        # Генерируем клиента
-        user_uuid = str(uuid.uuid4())
-        expiry_timestamp = (int(time.time()) + 2 * 24 * 60 * 60) * 1000
-
-        new_client = {
-            "id": user_uuid,
-            "flow": "xtls-rprx-vision",
-            "email": f"{tg_id}@vpn",
-            "limitIp": 0,
-            "totalGB": 0,
-            "expiryTime": expiry_timestamp,
-            "enable": True
+          if (platform === "android" || platform === "ios") {
+            Telegram.WebApp.openLink(deeplink);
+          } else if (platform === "mac") {
+            // Для Mac (happ://)
+            const stripped = data.vless_url.replace("vless://", "");
+            const encoded = encodeURIComponent(stripped);
+            const macLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
+            Telegram.WebApp.openLink(macLink);
+          } else {
+            // Для других платформ можно показать сообщение или ничего не делать
+          }
+        } else {
+          // Можно показать ошибку пользователю
         }
-
-        clients.append(new_client)
-        settings["clients"] = clients
-        settings["decryption"] = "none"
-
-        # Собираем обновлённый payload
-        payload = {
-            "remark": inbound.get("remark"),
-            "listen": inbound.get("listen", ""),
-            "port": PORT,
-            "protocol": inbound.get("protocol"),
-            "settings": json.dumps(settings),
-            "streamSettings": inbound.get("streamSettings"),
-            "sniffing": inbound.get("sniffing"),
-            "allocate": inbound.get("allocate", json.dumps({})),
-            "enable": True
-        }
-
-        update_url = f"{API_BASE}/inbounds/update/{inbound_id}"
-        logging.info(f"📤 Отправляем обновление inbound ID: {inbound_id}")
-        update_r = requests.post(update_url, data=payload, cookies=cookies)
-        logging.info(f"📥 Ответ от 3x-ui: {update_r.status_code} {update_r.text}")
-
-        if update_r.status_code != 200 or not update_r.json().get("success", False):
-            return jsonify({
-                "error": "Ошибка при обновлении inbound",
-                "details": update_r.text
-            }), 500
-
-        # Сохраняем в БД
-        save_user(tg_id, user_uuid, expiry_timestamp)
-
-        # Генерация ссылки
-        vless_url = (
-            f"vless://{user_uuid}@{DOMAIN}:{PORT}"
-            f"?type=tcp&security=reality&flow=xtls-rprx-vision"
-            f"&sni=yahoo.com&fp=chrome&pbk={PUBLIC_KEY}&sid=07&spx=%2F#PlatformVPN"
-        )
-
-        # Сохраняем .txt
-        try:
-            config_path = f"/var/www/html/configs/{user_uuid}.txt"
-            with open(config_path, "w") as f:
-                f.write(vless_url)
-            logging.info(f"✅ Конфиг для нового UUID сохранён: {config_path}")
-        except Exception as e:
-            logging.error(f"❌ Ошибка сохранения нового VLESS-файла: {e}")
-
-        return jsonify({
-            "success": True,
-            "uuid": user_uuid,
-            "vless_url": vless_url
-        })
-
-    except Exception as e:
-        logging.exception("💥 Ошибка в процессе генерации клиента")
-        return jsonify({
-            "error": "Ошибка при создании клиента",
-            "details": str(e),
-            "trace": traceback.format_exc()
-        }), 500
-
-
-init_db()
-
-
-@app.route('/payment-success', methods=['POST'])
-def payment_success():
-    # 1. Читаем JSON и валидируем
-    data = request.get_json(force=True)
-    logging.info(f"📩 JSON DATA: {data}")
-
-    if not data:
-        return jsonify({"error": "No JSON payload received"}), 400
-
-    tg_id = data.get("object", {}).get("metadata", {}).get("tg_id")
-    duration_days = data.get("object", {}).get(
-        "metadata", {}).get("duration_days")
-
-    if not tg_id or not duration_days:
-        return jsonify({"error": "Missing 'tg_id' or 'duration_days'"}), 400
-
-    try:
-        existing_uuid = get_uuid_by_tg_id(tg_id)
-        cookies = get_cookie()
-        expiry_timestamp = int(
-            (datetime.utcnow() + timedelta(days=int(duration_days))).timestamp() * 1000
-        )
-
-        # Получаем все inbounds
-        r = requests.get(f"{API_BASE}/inbounds/list", cookies=cookies)
-        response_text = r.text
-        logging.info(f"📡 Ответ от /inbounds/list: статус {r.status_code}")
-        logging.info("📦 Сырой ответ от 3x-ui:")
-        logging.info(response_text)
-
-        try:
-            inbounds = json.loads(response_text)["obj"]
-        except Exception:
-            logging.exception("❌ Невалидный JSON от /inbounds/list")
-            return jsonify({"error": "Invalid JSON from 3x-ui"}), 502
-
-        inbound = next((i for i in inbounds if i.get("port") == PORT), None)
-        if not inbound:
-            return jsonify({"error": f"Inbound с портом {PORT} не найден"}), 404
-
-        inbound_id = inbound.get("id")
-        settings = inbound.get("settings")
-        if isinstance(settings, str):
-            settings = json.loads(settings)
-
-        clients = settings.get("clients", [])
-
-        if not existing_uuid:
-            # Клиента нет — создаём нового
-            new_uuid = str(uuid.uuid4())
-
-            new_client = {
-                "id": new_uuid,
-                "flow": "xtls-rprx-vision",
-                "email": tg_id,
-                "limitIp": 0,
-                "totalGB": 0,
-                "expiryTime": expiry_timestamp,
-                "enable": True
-            }
-
-            clients.append(new_client)
-            settings["clients"] = clients
-            settings["decryption"] = "none"
-
-            update_payload = {
-                "remark": inbound.get("remark"),
-                "listen": inbound.get("listen", ""),
-                "port": PORT,
-                "protocol": inbound.get("protocol"),
-                "settings": json.dumps(settings),
-                "streamSettings": inbound.get("streamSettings"),
-                "sniffing": inbound.get("sniffing"),
-                "allocate": inbound.get("allocate", json.dumps({})),
-                "enable": True
-            }
-
-            update_url = f"{API_BASE}/inbounds/update/{inbound_id}"
-            update_r = requests.post(
-                update_url, data=update_payload, cookies=cookies)
-            logging.info(
-                f"📥 Ответ от 3x-ui: {update_r.status_code} {update_r.text}")
-
-            save_user(tg_id, new_uuid, expiry_timestamp)
-            return jsonify({"message": "✅ Клиент создан и активирован"}), 200
-
-        else:
-            # Клиент есть — продлеваем
-            user_uuid = existing_uuid
-            current_expiry = get_expiry_by_tg_id(tg_id)
-            new_expiry = datetime.utcnow() + timedelta(days=int(duration_days))
-
-            if current_expiry and current_expiry > datetime.utcnow():
-                new_expiry = current_expiry + \
-                    timedelta(days=int(duration_days))
-
-            new_expiry_ts = int(new_expiry.timestamp() * 1000)
-
-            for client in clients:
-                if client["id"] == user_uuid:
-                    client["expiryTime"] = new_expiry_ts
-                    client["enable"] = True
-                    client["email"] = f"{tg_id}@vpn#{int(time.time())}"
-
-            settings["clients"] = clients
-            settings["decryption"] = "none"
-
-            update_payload = {
-                "remark": inbound.get("remark"),
-                "listen": inbound.get("listen", ""),
-                "port": PORT,
-                "protocol": inbound.get("protocol"),
-                "settings": json.dumps(settings),
-                "streamSettings": inbound.get("streamSettings"),
-                "sniffing": inbound.get("sniffing"),
-                "allocate": inbound.get("allocate", json.dumps({})),
-                "enable": True
-            }
-
-            update_url = f"{API_BASE}/inbounds/update/{inbound_id}"
-            update_r = requests.post(
-                update_url, data=update_payload, cookies=cookies)
-            logging.info(
-                f"📥 Ответ от 3x-ui: {update_r.status_code} {update_r.text}")
-
-            update_expiry_in_db(tg_id, new_expiry)
-            return jsonify({"message": "✅ Подписка успешно продлена"}), 200
-
-    except Exception as e:
-        logging.error(f"💥 Ошибка в /payment-success: {e}")
-        return jsonify({"error": str(e)}), 500
-
-
-# === Функция обновления inbound ===
-def update_inbound(cookies, payload):
-    response = requests.post(
-        f"{API_BASE}/inbounds/update", cookies=cookies, json=payload)
-    if response.status_code != 200:
-        logging.error(f"❌ Ошибка обновления inbound: {response.text}")
-        raise Exception("Ошибка обновления inbound")
-
-
-@app.route("/redirect")
-def redirect_to_scheme():
-    url = request.args.get("url")
-    if url:
-        return redirect(url)
-    return "❌ Нет URL для редиректа", 400
-
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5001)
+      } catch (err) {
+        // Можно обработать ошибку
+      }
+    });
+  </script>
+</body>
+</html>
