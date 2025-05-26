@@ -16,55 +16,14 @@
     </div>
   </div>
 
-  <script>
-    Telegram.WebApp.ready();
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+  Telegram.WebApp.ready();
 
-    const userAgent = navigator.userAgent.toLowerCase();
-
-    document.getElementById("load-button").addEventListener("click", async () => {
-      let tg_id = "testuser123";
-
-      if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-        tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
-      }
-
-      try {
-        const res = await fetch("https://platformvpn.ru/generate-key", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tg_id })
-        });
-
-        const data = await res.json();
-
-        if (data.success && data.vless_url && data.uuid) {
-          const uuid = data.uuid;
-
-          if (userAgent.includes("iphone") || userAgent.includes("android")) {
-            // iOS/Android — открываем промежуточную страницу с кнопкой
-            const launcherUrl = `https://platformvpn.ru/link-launcher.html?uuid=${uuid}`;
-            Telegram.WebApp.openLink(launcherUrl);
-
-          } else if (userAgent.includes("macintosh")) {
-            // macOS — редиректим на happ:// через бекенд
-            const stripped = data.vless_url.replace("vless://", "");
-            const encoded = encodeURIComponent(stripped);
-            const redirectLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
-            Telegram.WebApp.openLink(redirectLink);
-
-          } else {
-            alert("❌ Неизвестная платформа");
-          }
-
-        } else {
-          alert("❌ Не удалось получить ключ или данные некорректны");
-        }
-
-      } catch (err) {
-        alert("❌ Ошибка запроса: " + err.message);
-        console.error(err);
-      }
-    });
-  </script>
+  document.getElementById("load-button").addEventListener("click", () => {
+    alert("Кнопка нажата — сейчас откроем ya.ru"); // просто чтобы увидеть
+    Telegram.WebApp.openLink("https://ya.ru");
+  });
+</script>
 </body>
 </html>
