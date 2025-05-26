@@ -1,50 +1,70 @@
-<script>
-  Telegram.WebApp.ready();
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Загрузка ключей</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>Загрузите ключи Platforma в приложение</h2>
+    <div class="bottom-buttons">
+      <button class="button" id="load-button">Загрузить</button>
+      <button class="button" onclick="location.href='next-step.html'">Далее</button>
+    </div>
+  </div>
 
-  function detectPlatform() {
-    const ua = navigator.userAgent.toLowerCase();
-    if (/iphone|ipad|ipod/.test(ua)) return "ios";
-    if (/android/.test(ua)) return "android";
-    if (/macintosh/.test(ua)) return "mac";
-    return "unknown";
-  }
+  <script>
+    Telegram.WebApp.ready();
 
-  document.getElementById("load-button").addEventListener("click", async () => {
-    let tg_id = "testuser123";
-
-    if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-      tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
+    function detectPlatform() {
+      const ua = navigator.userAgent.toLowerCase();
+      if (/iphone|ipad|ipod/.test(ua)) return "ios";
+      if (/android/.test(ua)) return "android";
+      if (/macintosh/.test(ua)) return "mac";
+      return "unknown";
     }
 
-    try {
-      const res = await fetch("https://platformvpn.ru/generate-key", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tg_id })
-      });
+    document.getElementById("load-button").addEventListener("click", async () => {
+      let tg_id = "testuser123";
 
-      const data = await res.json();
-      const platform = detectPlatform();
-
-      if (data.success && data.uuid) {
-        if (platform === "ios" || platform === "android") {
-          const launcherUrl = `https://platformvpn.ru/bounce.html?uuid=${data.uuid}`;
-          Telegram.WebApp.openLink(launcherUrl);
-        } else if (platform === "mac") {
-          const stripped = data.vless_url.replace("vless://", "");
-          const encoded = encodeURIComponent(stripped);
-          const macLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
-          Telegram.WebApp.openLink(macLink);
-        } else {
-          alert("❌ Неизвестная платформа. Откройте на нужном устройстве.");
-        }
-      } else {
-        alert("❌ Не удалось получить ключ.");
+      if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
       }
 
-    } catch (err) {
-      alert("💥 Ошибка: " + err.message);
-      console.error(err);
-    }
-  });
-</script>
+      try {
+        const res = await fetch("https://platformvpn.ru/generate-key", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tg_id })
+        });
+
+        const data = await res.json();
+        const platform = detectPlatform();
+
+        if (data.success && data.uuid && data.vless_url) {
+          if (platform === "ios" || platform === "android") {
+            const launcherUrl = `https://platformvpn.ru/bounce.html?uuid=${data.uuid}`;
+            Telegram.WebApp.openLink(launcherUrl);
+          } else if (platform === "mac") {
+            const stripped = data.vless_url.replace("vless://", "");
+            const encoded = encodeURIComponent(stripped);
+            const macLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
+            Telegram.WebApp.openLink(macLink);
+          } else {
+            alert("❌ Неизвестная платформа. Откройте на нужном устройстве.");
+          }
+        } else {
+          alert("❌ Не удалось получить ключ.");
+        }
+
+      } catch (err) {
+        alert("💥 Ошибка: " + err.message);
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
