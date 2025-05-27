@@ -75,7 +75,7 @@
         window.location.href = data.smart_link;
       } else {
         log('Другие: открываем smart_link');
-        Telegram.WebApp.openLink
+        Telegram.WebApp.openLink(data.smart_link);
       }
     });
   </script>
