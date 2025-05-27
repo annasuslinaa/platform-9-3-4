@@ -3,36 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Установка</title>
+  <title>Подключение</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
   <div class="container">
-    <h2 id="platform-title">Настройка для ...</h2>
-    <button class="button" onclick="location.href='install.html'">На этом устройстве</button>
-    <br />
-    <button class="button">На другом устройстве</button>
+    <h2>Подключение к устройству</h2>
+    <button id="this-device" class="button">На этом устройстве</button>
   </div>
 
   <script>
-    const title = document.getElementById("platform-title");
+    Telegram.WebApp.ready();
 
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    let platform = "вашего устройства";
+    document.getElementById('this-device').onclick = async () => {
+      const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id;
+      if (!tg_id) {
+        alert("Ошибка: Telegram ID не найден.");
+        return;
+      }
 
-    if (/iPhone|iPad|iPod/i.test(userAgent)) {
-      platform = "iOS";
-    } else if (/Android/i.test(userAgent)) {
-      platform = "Android";
-    } else if (/Macintosh/i.test(userAgent)) {
-      platform = "Mac OS";
-    } else if (/Windows/i.test(userAgent)) {
-      platform = "Windows";
-    } else if (/Linux/i.test(userAgent)) {
-      platform = "Linux";
-    }
+      const res = await fetch('https://platformvpn.ru/generate-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tg_id })
+      });
 
-    title.innerText = `Настройка для ${platform}`;
+      const data = await res.json();
+      if (data.uuid) {
+        window.location.href = `keys.html?uuid=${data.uuid}`;
+      } else {
+        alert('Ошибка при генерации ключа.');
+      }
+    };
   </script>
 </body>
 </html>
