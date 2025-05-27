@@ -7,11 +7,9 @@
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    .button {
-      pointer-events: auto !important;
-      z-index: 10;
-      cursor: pointer;
-    }
+    .button { cursor: pointer; }
+    /* Скрываем наш “рабочий” линк */
+    #deeplink { display: none; }
   </style>
 </head>
 <body>
@@ -22,21 +20,22 @@
       <button class="button" onclick="location.href='next-step.html'">Далее</button>
     </div>
     <pre id="log" style="margin-top:20px; color:#fff;"></pre>
+    <!-- вот он: скрытый линк с deeplink-схемой -->
+    <a id="deeplink"></a>
   </div>
 
   <script>
     Telegram.WebApp.ready();
     const log = txt => document.getElementById('log').textContent += txt + '\n';
+    const loadBtn = document.getElementById('load-button');
+    const deepA  = document.getElementById('deeplink');
 
-    document.getElementById('load-button').addEventListener('click', async (e) => {
+    loadBtn.onclick = async (e) => {
       e.preventDefault();
       log('Кнопка нажата');
-
-      // tg_id
       const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id || 'testuser123';
       log('tg_id = ' + tg_id);
 
-      // запрос
       let res;
       try {
         res = await fetch('https://platformvpn.ru/generate-key', {
@@ -46,7 +45,6 @@
         });
       } catch (err) {
         log('Fetch error: ' + err);
-        alert('Ошибка связи с сервером');
         return;
       }
       log('Статус ответа: ' + res.status);
@@ -56,28 +54,20 @@
         data = await res.json();
       } catch (err) {
         log('JSON parse error: ' + err);
-        alert('Неверный ответ от сервера');
         return;
       }
       log('Ответ JSON: ' + JSON.stringify(data));
 
-      if (!data.smart_link) {
-        log('❌ smart_link отсутствует');
-        alert('Что-то пошло не так, попробуйте позже');
+      if (!data.deeplink) {
+        log('❌ нет data.deeplink');
         return;
       }
 
-      const ua = navigator.userAgent.toLowerCase();
-      const isIOS = /iphone|ipad|ipod/.test(ua);
-
-      if (isIOS) {
-        log('iOS: открываем smart_link в Safari');
-        Telegram.WebApp.openLink(data.smart_link);
-      } else {
-        log('Другие: открываем smart_link');
-        Telegram.WebApp.openLink(data.smart_link);
-      }
-    });
+      // вот ключевое: проставляем href и эмулируем клик
+      deepA.href = data.deeplink;
+      deepA.click();   // <— именно это откроет v2raytun://… прямо в Telegram
+      log('Выполнен anchor.click() → должно открыться приложение');
+    };
   </script>
 </body>
 </html>
