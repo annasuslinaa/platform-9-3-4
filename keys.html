@@ -9,22 +9,10 @@
 <body>
   <div class="container">
     <h2>Загрузите ключи Platforma в приложение</h2>
-    <a id="open-link" class="button" href="#">ОТКРЫТЬ V2RayTun</a>
+    <div class="bottom-buttons">
+      <a class="button" href="v2raytun://import/https://platformvpn.ru/s/{{ uuid }}">Загрузить</a>
+      <button class="button" onclick="location.href='next-step.html'">Далее</button>
+    </div>
   </div>
-
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const uuid = urlParams.get('uuid');
-    const button = document.getElementById('open-link');
-
-    if (uuid) {
-      const deeplink = `v2raytun://import/https://platformvpn.ru/s/${uuid}`;
-      button.href = deeplink;
-    } else {
-      button.innerText = 'Ошибка: UUID не найден';
-      button.classList.add('disabled');
-      button.style.pointerEvents = 'none';
-    }
-  </script>
 </body>
 </html>
