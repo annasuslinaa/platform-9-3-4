@@ -34,7 +34,7 @@
         const data = await res.json();
 
         if (data.smart_link) {
-          window.location.href = data.smart_link; // Открывает промежуточную страницу /open/uuid
+        Telegram.WebApp.openLink(data.smart_link); // Открывает промежуточную страницу /open/uuid
         } else {
           alert("❌ Ошибка: smart_link не получен");
         }
