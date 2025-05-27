@@ -7,9 +7,18 @@
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    .button { cursor: pointer; }
-    /* Скрываем наш “рабочий” линк */
-    #deeplink { display: none; }
+    body, html { margin:0; padding:0; height:100%; }
+    .container { position: relative; width:100%; max-width:400px; margin:0 auto; padding:40px 20px; text-align:center; }
+    .button { cursor:pointer; margin:10px auto; }
+    #deeplink {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      z-index: 9999;
+      display: block;
+    }
+    pre { color: #fff; text-align: left; max-height: 150px; overflow-y: auto; }
   </style>
 </head>
 <body>
@@ -19,21 +28,24 @@
       <button id="load-button" class="button">Загрузить</button>
       <button class="button" onclick="location.href='next-step.html'">Далее</button>
     </div>
-    <pre id="log" style="margin-top:20px; color:#fff;"></pre>
-    <!-- вот он: скрытый линк с deeplink-схемой -->
-    <a id="deeplink"></a>
+    <pre id="log"></pre>
+    <!-- невидимая, но кликабельная ссылка с deeplink-схемой -->
+    <a id="deeplink" href="#" target="_blank" rel="noopener"></a>
   </div>
 
   <script>
     Telegram.WebApp.ready();
-    const log = txt => document.getElementById('log').textContent += txt + '\n';
+    const logEl = document.getElementById('log');
+    const log = txt => logEl.textContent += txt + '\n';
     const loadBtn = document.getElementById('load-button');
     const deepA  = document.getElementById('deeplink');
 
     loadBtn.onclick = async (e) => {
       e.preventDefault();
       log('Кнопка нажата');
-      const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id || 'testuser123';
+
+      const rawUser = Telegram.WebApp.initDataUnsafe?.user;
+      const tg_id = rawUser?.id || 'testuser123';
       log('tg_id = ' + tg_id);
 
       let res;
@@ -63,10 +75,11 @@
         return;
       }
 
-      // вот ключевое: проставляем href и эмулируем клик
-      deepA.href = data.deeplink;
-      deepA.click();   // <— именно это откроет v2raytun://… прямо в Telegram
-      log('Выполнен anchor.click() → должно открыться приложение');
+      // Настраиваем ссылку и эмулируем клик
+      deepA.href   = data.deeplink;
+      deepA.target = '_blank';
+      log('Эмулируем клик по deeplink-ссылке');
+      deepA.click();
     };
   </script>
 </body>
