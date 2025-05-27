@@ -1,45 +1,83 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Загрузка ключей</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css"/>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    /* Уточнённые стили, чтобы кнопка точно кликабельна */
+    .button {
+      pointer-events: auto !important;
+      z-index: 10;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h2>Загрузите ключи Platforma в приложение</h2>
     <div class="bottom-buttons">
-      <button class="button" id="load-button">Загрузить</button>
+      <button id="load-button" class="button">Загрузить</button>
       <button class="button" onclick="location.href='next-step.html'">Далее</button>
     </div>
+    <pre id="log" style="margin-top:20px; color:#fff;"></pre>
   </div>
 
   <script>
     Telegram.WebApp.ready();
+    const log = txt => document.getElementById('log').textContent += txt + '\n';
 
-    document.getElementById("load-button").addEventListener("click", async () => {
-      const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id || "testuser123";
+    document.getElementById('load-button').addEventListener('click', async (e) => {
+      e.preventDefault();
+      log('Кнопка нажата');
 
+      // Получаем Telegram ID (fallback для теста)
+      const rawUser = Telegram.WebApp.initDataUnsafe?.user;
+      const tg_id = rawUser?.id || 'testuser123';
+      log('tg_id = ' + tg_id);
+
+      // Запрос на генерацию ключа
+      let res;
       try {
-        const res = await fetch("https://platformvpn.ru/generate-key", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ tg_id }),
+        res = await fetch('https://platformvpn.ru/generate-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tg_id })
         });
-
-        const data = await res.json();
-
-        if (data.smart_link) {
-        Telegram.WebApp.openLink(data.smart_link); // Открывает промежуточную страницу /open/uuid
-        } else {
-          alert("❌ Ошибка: smart_link не получен");
-        }
       } catch (err) {
-        alert("❌ Ошибка при запросе ключа: " + err);
+        log('Fetch error: ' + err);
+        alert('Ошибка связи с сервером');
+        return;
+      }
+      log('Статус ответа: ' + res.status);
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        log('Ошибка парсинга JSON: ' + err);
+        alert('Неверный ответ от сервера');
+        return;
+      }
+      log('Ответ JSON: ' + JSON.stringify(data));
+
+      if (!data.deeplink || !data.smart_link) {
+        log('❌ Ответ не содержит deeplink или smart_link');
+        alert('Что-то пошло не так, повторите позже');
+        return;
+      }
+
+      // Определяем платформу
+      const ua = navigator.userAgent.toLowerCase();
+      const isIOS = /iphone|ipad|ipod/.test(ua);
+
+      if (isIOS) {
+        log('iOS: открываем deeplink');
+        Telegram.WebApp.openLink(data.deeplink);
+      } else {
+        log('Другие: открываем smart_link');
+        window.location.href = data.smart_link;
       }
     });
   </script>
