@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    /* Уточнённые стили, чтобы кнопка точно кликабельна */
     .button {
       pointer-events: auto !important;
       z-index: 10;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -32,17 +32,16 @@
       e.preventDefault();
       log('Кнопка нажата');
 
-      // Получаем Telegram ID (fallback для теста)
-      const rawUser = Telegram.WebApp.initDataUnsafe?.user;
-      const tg_id = rawUser?.id || 'testuser123';
+      // tg_id
+      const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id || 'testuser123';
       log('tg_id = ' + tg_id);
 
-      // Запрос на генерацию ключа
+      // запрос
       let res;
       try {
         res = await fetch('https://platformvpn.ru/generate-key', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type':'application/json' },
           body: JSON.stringify({ tg_id })
         });
       } catch (err) {
@@ -56,25 +55,24 @@
       try {
         data = await res.json();
       } catch (err) {
-        log('Ошибка парсинга JSON: ' + err);
+        log('JSON parse error: ' + err);
         alert('Неверный ответ от сервера');
         return;
       }
       log('Ответ JSON: ' + JSON.stringify(data));
 
-      if (!data.deeplink || !data.smart_link) {
-        log('❌ Ответ не содержит deeplink или smart_link');
-        alert('Что-то пошло не так, повторите позже');
+      if (!data.smart_link) {
+        log('❌ smart_link отсутствует');
+        alert('Что-то пошло не так, попробуйте позже');
         return;
       }
 
-      // Определяем платформу
       const ua = navigator.userAgent.toLowerCase();
       const isIOS = /iphone|ipad|ipod/.test(ua);
 
       if (isIOS) {
-        log('iOS: открываем deeplink');
-        Telegram.WebApp.openLink(data.deeplink);
+        log('iOS: открываем smart_link в Safari');
+        Telegram.WebApp.openLink(data.smart_link);
       } else {
         log('Другие: открываем smart_link');
         window.location.href = data.smart_link;
