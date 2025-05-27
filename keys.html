@@ -72,10 +72,10 @@
 
       if (isIOS) {
         log('iOS: открываем smart_link в Safari');
-        Telegram.WebApp.openLink(data.smart_link);
+        window.location.href = data.smart_link;
       } else {
         log('Другие: открываем smart_link');
-        window.location.href = data.smart_link;
+        Telegram.WebApp.openLink
       }
     });
   </script>
