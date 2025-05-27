@@ -1,90 +1,37 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Загрузка ключей</title>
-  <link rel="stylesheet" href="styles.css"/>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тест ссылки</title>
   <style>
-    .button {
-      display: inline-block;
-      padding: 12px 24px;
-      margin: 10px auto;
-      font-size: 16px;
-      background-color: rgba(255,255,255,0.9);
-      color: #000;
-      border-radius: 12px;
-      cursor: pointer;
-      text-decoration: none;
-      pointer-events: none;   /* по умолчанию не кликабельно */
-      opacity: 0.5;
-    }
-    .button.enabled {
-      pointer-events: auto;
-      opacity: 1;
-    }
-    #log {
-      margin-top: 20px;
+    body {
+      background: #191d24;
       color: #fff;
-      text-align: left;
-      max-height: 150px;
-      overflow-y: auto;
-      font-size: 14px;
-      white-space: pre-wrap;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    a.button {
+      display: block;
+      padding: 20px 30px;
+      background: white;
+      color: black;
+      text-decoration: none;
+      font-size: 18px;
+      border-radius: 12px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Загрузите ключи Platforma в приложение</h2>
-    <div class="bottom-buttons">
-      <!-- Это теперь ссылка, а не button -->
-      <a id="load-link" class="button">Загрузить</a>
-      <button class="button" onclick="location.href='next-step.html'">Далее</button>
-    </div>
-    <pre id="log"></pre>
-  </div>
-
-  <script>
-    Telegram.WebApp.ready();
-    const logEl = document.getElementById('log');
-    const log = txt => logEl.textContent += txt + '\n';
-    const loadLink = document.getElementById('load-link');
-
-    // Получаем tg_id сразу
-    const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id || 'testuser123';
-    log('tg_id = ' + tg_id);
-
-    // При загрузке страницы вызываем API и готовим deeplink
-    fetch('https://platformvpn.ru/generate-key', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tg_id })
-    })
-    .then(res => {
-      log('Статус генерации: ' + res.status);
-      return res.json();
-    })
-    .then(data => {
-      log('Ответ JSON: ' + JSON.stringify(data));
-      if (data.deeplink) {
-        // Устанавливаем href и делаем ссылку кликабельной
-        loadLink.href = data.deeplink;
-        loadLink.classList.add('enabled');
-        log('Ссылка готова, нажмите «Загрузить»');
-      } else {
-        log('Ошибка: data.deeplink отсутствует');
-      }
-    })
-    .catch(err => {
-      log('Fetch error: ' + err);
-    });
-
-    // Никаких JS-редиректов здесь нет — всё через чистый <a href>
-    loadLink.addEventListener('click', () => {
-      log('Пользователь кликнул на ссылку — WebView должен открыть deeplink');
-    });
-  </script>
+  <a class="button"
+     href="v2raytun://import/https://platformvpn.ru/s/c7f2cdf7-c4be-4a1b-a1af-6d1f72445a68"
+     target="_blank"
+     rel="noopener noreferrer">
+    ОТКРЫТЬ V2RayTun
+  </a>
 </body>
 </html>
