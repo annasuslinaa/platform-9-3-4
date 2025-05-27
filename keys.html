@@ -2,74 +2,58 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Загрузка ключей</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <title>Тест PlatformVPN</title>
 </head>
 <body>
-  <div class="container">
-    <h2>Загрузите ключи Platforma в приложение</h2>
-    <div class="bottom-buttons">
-      <button class="button" id="load-button">Загрузить</button>
-      <button class="button" onclick="location.href='next-step.html'">Далее</button>
-    </div>
-  </div>
+  <button class="button" id="load-button">Загрузить</button>
 
- <script>
-Telegram.WebApp.ready();
+  <script>
+    // Обработчик срабатывает после того, как DOM уже загружен!
+    Telegram?.WebApp?.ready?.();
 
-function detectPlatform() {
-  const ua = navigator.userAgent.toLowerCase();
-  if (/iphone|ipad|ipod/.test(ua)) return "ios";
-  if (/android/.test(ua)) return "android";
-  if (/macintosh/.test(ua)) return "mac";
-  return "unknown";
-}
-
-document.getElementById("load-button").addEventListener("click", async () => {
-  let tg_id = "testuser123";
-  if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-    tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
-  }
-
-  try {
-    // 1. Запрос на генерацию ключа
-    const res = await fetch("https://platformvpn.ru/generate-key", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tg_id })
-    });
-    const data = await res.json();
-
-    // 2. Проверка ответа и генерация deeplink
-    if (data.success && data.uuid && data.vless_url) {
-      const configUrl = `https://platformvpn.ru/configs/${data.uuid}.txt`;
-      const deeplink = `v2raytun://import/${configUrl}`;
-      const platform = detectPlatform();
-
-      // 3. Пробуем открыть deeplink как у Ultima
-      if (platform === "ios" || platform === "android") {
-        // Важно! Используем window.location.href как у Ultima
-        window.location.href = deeplink;
-        // Альтернатива: Telegram.WebApp.openLink(deeplink);
-      } else if (platform === "mac") {
-        // Для Mac (примерно как у тебя)
-        const stripped = data.vless_url.replace("vless://", "");
-        const encoded = encodeURIComponent(stripped);
-        const macLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
-        window.location.href = macLink;
-      } else {
-        // Показываем инструкцию для десктопа и других платформ
-        alert("Откройте эту страницу на мобильном устройстве для автоматического добавления ключа");
-      }
-    } else {
-      alert("Ошибка генерации ключа. Попробуйте еще раз.");
+    function detectPlatform() {
+      const ua = navigator.userAgent.toLowerCase();
+      if (/iphone|ipad|ipod/.test(ua)) return "ios";
+      if (/android/.test(ua)) return "android";
+      if (/macintosh/.test(ua)) return "mac";
+      return "unknown";
     }
-  } catch (err) {
-    alert("Ошибка соединения с сервером. Попробуйте еще раз.");
-  }
-});
-</script>
+
+    document.getElementById("load-button").addEventListener("click", async () => {
+      let tg_id = "testuser123";
+      if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        tg_id = Telegram.WebApp.initDataUnsafe.user.id.toString();
+      }
+      try {
+        const res = await fetch("https://platformvpn.ru/generate-key", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tg_id })
+        });
+        const data = await res.json();
+
+        if (data.success && data.uuid && data.vless_url) {
+          const configUrl = `https://platformvpn.ru/configs/${data.uuid}.txt`;
+          const deeplink = `v2raytun://import/${configUrl}`;
+          const platform = detectPlatform();
+
+          if (platform === "ios" || platform === "android") {
+            window.location.href = deeplink;
+          } else if (platform === "mac") {
+            const stripped = data.vless_url.replace("vless://", "");
+            const encoded = encodeURIComponent(stripped);
+            const macLink = `https://platformvpn.ru/redirect?url=happ://import/${encoded}`;
+            window.location.href = macLink;
+          } else {
+            alert("Откройте эту страницу на мобильном устройстве для автоматического добавления ключа");
+          }
+        } else {
+          alert("Ошибка генерации ключа. Попробуйте еще раз.");
+        }
+      } catch (err) {
+        alert("Ошибка соединения с сервером. Попробуйте еще раз.");
+      }
+    });
+  </script>
 </body>
 </html>
