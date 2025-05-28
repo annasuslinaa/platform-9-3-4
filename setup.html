@@ -31,9 +31,10 @@
       const result = await response.json();
 
       if (result.success) {
-        window.location.href = `/keys?uuid=${result.uuid}`;
-      } else {
-        alert("Ошибка: " + result.error);
+  window.location.href = `https://platformvpn.ru/keys?uuid=${result.uuid}`;
+      }
+      else {
+      alert("Ошибка: " + result.error);
       }
     });
   </script>
