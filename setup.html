@@ -37,6 +37,7 @@
         });
 
         const result = await response.json();
+        console.log("Результат от сервера:", result); // ← ВОТ СЮДА ДОБАВИЛ
         const uuid = result.uuid;
 
         console.log("UUID от сервера:", uuid);
