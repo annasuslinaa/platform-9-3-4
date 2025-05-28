@@ -20,7 +20,7 @@
     Telegram.WebApp.ready();
 
     document.getElementById('this-device-button').addEventListener('click', async () => {
-      const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id || "testuser123";
+      const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id || "testuser1234";
 
       const response = await fetch('https://platformvpn.ru/generate-key', {
         method: 'POST',
