@@ -9,31 +9,10 @@
 <body>
   <div class="container">
     <h2>Загрузите ключи Platforma в приложение</h2>
-
     <div class="bottom-buttons">
-      <!-- видимая кнопка, href вставляется как можно раньше -->
-      <a id="download-button" class="button">Загрузить</a>
+      <a class="button" href="{{ vless_url }}">Загрузить</a>
       <button class="button" onclick="location.href='next-step.html'">Далее</button>
     </div>
   </div>
-
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const uuid = params.get("uuid");
-
-    if (uuid) {
-      const link = `v2raytun://import/https://platformvpn.ru/s/${uuid}`;
-      const btn = document.getElementById("download-button");
-
-      // прописываем href как можно раньше
-      btn.setAttribute("href", link);
-    } else {
-      // если uuid не найден — блокируем кнопку
-      const btn = document.getElementById("download-button");
-      btn.textContent = "Ошибка: UUID не найден";
-      btn.classList.add("disabled");
-      btn.removeAttribute("href");
-    }
-  </script>
 </body>
 </html>
