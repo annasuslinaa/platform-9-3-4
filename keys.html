@@ -9,10 +9,18 @@
 <body>
   <div class="container">
     <h2>Загрузите ключи Platforma в приложение</h2>
-    <div class="bottom-buttons">
-      <a class="button" href="v2raytun://import/https://platformvpn.ru/s/{{ uuid }}">Загрузить</a>
-      <button class="button" onclick="location.href='next-step.html'">Далее</button>
-    </div>
+    <a id="download-button" class="button" href="#">Загрузить</a>
   </div>
+
+  <script>
+    const uuid = new URLSearchParams(window.location.search).get('uuid');
+    if (uuid) {
+      const link = `v2raytun://import/https://platformvpn.ru/s/${uuid}`;
+      document.getElementById('download-button').href = link;
+    } else {
+      document.getElementById('download-button').textContent = 'Ошибка: UUID не найден';
+      document.getElementById('download-button').classList.add('disabled');
+    }
+  </script>
 </body>
 </html>
