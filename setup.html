@@ -2,40 +2,62 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Настройка устройства</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Setup VPN</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
   <div class="container">
-    <h2>Установим конфигурацию на это устройство?</h2>
-    <div class="bottom-buttons">
-      <button id="this-device-button" class="button">На этом устройстве</button>
-      <button class="button" onclick="location.href='install.html'">Назад</button>
-    </div>
+    <h2>Выберите устройство для настройки</h2>
+    <button id="on-this-device" class="button">На этом устройстве</button>
+    <button id="other-device" class="button">На другом устройстве</button>
   </div>
 
   <script>
     Telegram.WebApp.ready();
 
-    document.getElementById('this-device-button').addEventListener('click', async () => {
-      const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id || "testuser1234";
+    // Определение устройства
+    const ua = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+    const isAndroid = /android/.test(ua);
+    const isMac = /macintosh/.test(ua);
 
-      const response = await fetch('https://platformvpn.ru/generate-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tg_id })
-      });
+    function getDeviceType() {
+      if (isIOS) return "ios";
+      if (isAndroid) return "android";
+      if (isMac) return "mac";
+      return "other";
+    }
 
-      const result = await response.json();
+    document.getElementById("on-this-device").addEventListener("click", async () => {
+      const tg_id = Telegram.WebApp.initDataUnsafe.user.id;  // Получаем Telegram ID
+      const device_type = getDeviceType();
 
-      if (result.success) {
-  window.location.href = `https://platformvpn.ru/keys?uuid=${result.uuid}`;
+      try {
+        const resp = await fetch("https://platformvpn.ru/generate-key", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tg_id, device_type }),
+        });
+
+        if (!resp.ok) throw new Error("Ошибка генерации ключа");
+
+        const text = await resp.text();
+
+        // После редиректа с бэка будет URL, куда надо перейти
+        // Сервер делает редирект, и fetch получает тело страницы
+        // Чтобы сделать редирект, просто перенаправим браузер
+        window.location.href = resp.url;
+
+      } catch (error) {
+        alert(error.message);
       }
-      else {
-      alert("Ошибка: " + result.error);
-      }
+    });
+
+    document.getElementById("other-device").addEventListener("click", () => {
+      // Просто редирект на инструкцию или другую страницу
+      window.location.href = "https://platformvpn.ru/instruction.html";
     });
   </script>
 </body>
