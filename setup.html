@@ -12,68 +12,44 @@
     <h2>Установим конфигурацию на это устройство?</h2>
     <div class="bottom-buttons">
       <button id="this-device-button" class="button">На этом устройстве</button>
-      <button id="other-device-button" class="button">На другом устройстве</button>
+      <button class="button" onclick="location.href='install.html'">Назад</button>
     </div>
   </div>
 
   <script>
-    // Ловим ошибки JS и выводим их в alert для отладки
-    window.onerror = function(msg, url, line) {
-      alert(`Ошибка JS: ${msg} (строка ${line})`);
-    };
+    Telegram.WebApp.ready();
 
-    window.addEventListener("DOMContentLoaded", function() {
-      // Инициализируем Telegram WebApp, если он есть
-      if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.ready();
-      }
+    document.getElementById('this-device-button').addEventListener('click', async () => {
+      const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id || "testuser123";
 
-      const btnThis = document.getElementById("this-device-button");
-      const btnOther = document.getElementById("other-device-button");
+      // Определение устройства
+      const ua = navigator.userAgent.toLowerCase();
+      const device_type =
+        /iphone|ipad|ipod/.test(ua) ? "ios" :
+        /android/.test(ua) ? "android" :
+        /macintosh/.test(ua) ? "mac" : "other";
 
-      if (!btnThis) {
-        console.error("Кнопка 'На этом устройстве' не найдена!");
-        return;
-      }
-
-      btnThis.addEventListener("click", async function() {
-        // Определяем устройство
-        const ua = navigator.userAgent.toLowerCase();
-        const isIOS     = /iphone|ipad|ipod/.test(ua);
-        const isAndroid = /android/.test(ua);
-        const isMac     = /macintosh/.test(ua);
-        let device_type = "other";
-        if (isIOS)     device_type = "ios";
-        else if (isAndroid) device_type = "android";
-        else if (isMac)     device_type = "mac";
-
-        // Получаем реальный Telegram ID (или ставим тестовый)
-        let tg_id = "unknown";
-        try {
-          tg_id = Telegram.WebApp.initDataUnsafe.user.id;
-        } catch(e) {
-          console.warn("Telegram ID недоступен, используем 'unknown'");
-        }
-
-        // Отправляем запрос на бэк
-        try {
-          const resp = await fetch("https://platformvpn.ru/generate-key", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ tg_id, device_type })
-          });
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          // Редирект на URL, который вернёт бэк (ios, android, mac, other)
-          window.location.href = resp.url;
-        } catch (err) {
-          alert("Ошибка при генерации ключа: " + err.message);
-        }
-      });
-
-      if (btnOther) {
-        btnOther.addEventListener("click", function() {
-          window.location.href = "https://platformvpn.ru/instruction.html";
+      try {
+        const response = await fetch('https://platformvpn.ru/generate-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tg_id })
         });
+
+        const result = await response.json();
+        const uuid = result.uuid;
+
+        console.log("UUID от сервера:", uuid);
+        console.log("Редирект:", `https://platformvpn.ru/${device_type}?uuid=${uuid}`);
+
+        if (result.success && uuid) {
+          window.location.href = `https://platformvpn.ru/${device_type}?uuid=${uuid}`;
+        } else {
+          alert("Ошибка: " + (result.error || "uuid не получен"));
+        }
+
+      } catch (error) {
+        alert("Ошибка при запросе: " + error.message);
       }
     });
   </script>
