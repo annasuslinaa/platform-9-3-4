@@ -51,13 +51,13 @@ nextBtn.addEventListener("click", () => {
     return;
   }
 
-  if (platform === "ios") {
-    location.href = `https://platformvpn.ru/keys?uuid=${uuid}`;
-  } else if (platform === "android" || platform === "mac") {
-    location.href = `https://platformvpn.ru/openlink?uuid=${uuid}`;
-  } else {
-    location.href = "https://platformvpn.ru/instruction";
-  }
+if (platform === "ios" || platform === "android") {
+  location.href = `https://platformvpn.ru/keys?uuid=${uuid}`;
+} else if (platform === "mac") {
+  location.href = `https://platformvpn.ru/openlink?uuid=${uuid}`;
+} else {
+  location.href = "https://platformvpn.ru/instruction";
+}
 });
   </script>
 </body>
