@@ -45,24 +45,20 @@
       installBtn.innerText = "Недоступно";
     }
 
-    nextBtn.addEventListener("click", () => {
-      if (!uuid || !platform) {
-        alert("Ошибка: отсутствует uuid или platform");
-        return;
-      }
+nextBtn.addEventListener("click", () => {
+  if (!uuid || !platform) {
+    alert("Ошибка: отсутствует uuid или platform");
+    return;
+  }
 
-      if (platform === "ios") {
-        location.href = `https://platformvpn.ru/keys?uuid=${uuid}`;
-      } else if (platform === "android") {
-        const deeplink = `v2raytun://import/https://platformvpn.ru/s/${uuid}`;
-        location.href = `https://platformvpn.ru/openlink?deeplink=${encodeURIComponent(deeplink)}`;
-      } else if (platform === "mac") {
-        const deeplink = `happ://import/https://platformvpn.ru/s/${uuid}`;
-        location.href = `https://platformvpn.ru/openlink?deeplink=${encodeURIComponent(deeplink)}`;
-      } else {
-        location.href = "https://platformvpn.ru/instruction";
-      }
-    });
+  if (platform === "ios") {
+    location.href = `https://platformvpn.ru/keys?uuid=${uuid}`;
+  } else if (platform === "android" || platform === "mac") {
+    location.href = `https://platformvpn.ru/openlink?uuid=${uuid}`;
+  } else {
+    location.href = "https://platformvpn.ru/instruction";
+  }
+});
   </script>
 </body>
 </html>
