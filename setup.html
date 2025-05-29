@@ -11,21 +11,16 @@
   <div class="container">
     <h2 id="platform-title">Настройка...</h2>
     <div class="bottom-buttons">
-      <button class="button">На этом устройстве</button>
-      <button class="button" onclick="location.href='install.html'">Назад</button>
+      <button class="button" id="device-btn">На этом устройстве</button>
+      <button class="button" onclick="location.href='index.html'">Назад</button>
     </div>
   </div>
 
   <script>
     Telegram.WebApp.ready();
 
-    const params = new URLSearchParams(window.location.search);
-    const uuid = params.get("uuid");
     const title = document.getElementById("platform-title");
-
-    if (!uuid) {
-      alert("UUID не передан");
-    }
+    const deviceBtn = document.getElementById("device-btn");
 
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     let platform = "other";
@@ -40,13 +35,28 @@
 
     title.innerText = `Настройка для ${platform}`;
 
-    document.querySelector("button").addEventListener("click", () => {
-      if (!uuid) return;
+    deviceBtn.addEventListener("click", async () => {
+      // Указываем tg_id (в проде — получить из Telegram WebApp initData или cookie)
+      const tg_id = "testuser123";
 
-      if (platform === "ios") {
-        location.href = `/keys?uuid=${uuid}`;
-      } else {
-        location.href = `/${platform}?uuid=${uuid}`;
+      try {
+        const res = await fetch("/generate-key", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tg_id })
+        });
+
+        const data = await res.json();
+
+        if (!data.uuid) {
+          alert("Ошибка при генерации UUID");
+          return;
+        }
+
+        const uuid = data.uuid;
+        location.href = `install.html?uuid=${uuid}&platform=${platform}`;
+      } catch (err) {
+        alert("Ошибка подключения к серверу");
       }
     });
   </script>

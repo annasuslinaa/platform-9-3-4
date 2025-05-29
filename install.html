@@ -8,16 +8,24 @@
 </head>
 <body>
   <div class="container">
-    <h2>Установите приложение и возвращаетесь</h2>
+    <h2>Установите приложение и возвращайтесь</h2>
     <div class="bottom-buttons">
       <a id="install-btn" class="button" href="#" target="_blank">Установить</a>
-      <button class="button" onclick="location.href='keys.html'">Следующий шаг</button>
+      <button class="button" id="next-btn">Следующий шаг</button>
     </div>
   </div>
+
   <script>
     const installBtn = document.getElementById("install-btn");
+    const nextBtn = document.getElementById("next-btn");
+
+    const params = new URLSearchParams(window.location.search);
+    const uuid = params.get("uuid");
+    const platform = params.get("platform");
+
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
+    // Определяем ссылку на установку приложения
     let url = null;
 
     if (/iPhone|iPad|iPod/i.test(userAgent)) {
@@ -37,6 +45,23 @@
       installBtn.style.pointerEvents = "none";
       installBtn.innerText = "Недоступно";
     }
+
+    // Кнопка «Следующий шаг» → редирект по платформе
+    nextBtn.addEventListener("click", () => {
+      if (!uuid || !platform) {
+        alert("Ошибка: отсутствует uuid или platform");
+        return;
+      }
+
+      if (platform === "ios") {
+        location.href = `/keys?uuid=${uuid}`;
+      } else if (platform === "android" || platform === "mac") {
+        const deeplink = `v2raytun://import/https://platformvpn.ru/s/${uuid}`;
+        location.href = `/openlink?deeplink=${encodeURIComponent(deeplink)}`;
+      } else {
+        location.href = "/instruction.html";
+      }
+    });
   </script>
 </body>
 </html>
