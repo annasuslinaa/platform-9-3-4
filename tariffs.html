@@ -1,35 +1,62 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Выбор тарифа</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Выбор тарифа</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h2 class="tariff-title">Выберите подходящий тариф и оплатите</h2>
-        <div class="tariffs-grid">
-            <div class="tariff-box">
-                <div class="period">1 месяц</div>
-                <div class="price">200 ₽</div>
-            </div>
-            <div class="tariff-box">
-                <div class="period">3 месяца</div>
-                <div class="price">540 ₽</div>
-                <div class="subtitle">180 ₽ в месяц</div>
-            </div>
-            <div class="tariff-box">
-                <div class="period">6 месяцев</div>
-                <div class="price">960 ₽</div>
-                <div class="subtitle">160 ₽ в месяц</div>
-            </div>
-            <div class="tariff-box">
-                <div class="period">1 год</div>
-                <div class="price">1 560 ₽</div>
-                <div class="subtitle">130 ₽ в месяц</div>
-            </div>
-        </div>
+  <div class="container">
+    <h2 class="tariff-title">Выберите подходящий тариф и оплатите</h2>
+    <div class="tariffs-grid">
+      <div class="tariff-box">
+        <div class="period">1 месяц</div>
+        <div class="price">200 ₽</div>
+        <button class="button" onclick="pay('1month')">Оплатить</button>
+      </div>
+      <div class="tariff-box">
+        <div class="period">3 месяца</div>
+        <div class="price">540 ₽</div>
+        <div class="subtitle">180 ₽ в месяц</div>
+        <button class="button" onclick="pay('3month')">Оплатить</button>
+      </div>
+      <div class="tariff-box">
+        <div class="period">6 месяцев</div>
+        <div class="price">960 ₽</div>
+        <div class="subtitle">160 ₽ в месяц</div>
+        <button class="button" onclick="pay('6month')">Оплатить</button>
+      </div>
+      <div class="tariff-box">
+        <div class="period">1 год</div>
+        <div class="price">1 560 ₽</div>
+        <div class="subtitle">130 ₽ в месяц</div>
+        <button class="button" onclick="pay('12month')">Оплатить</button>
+      </div>
     </div>
+  </div>
+
+  <script>
+    Telegram.WebApp.ready();
+
+    async function pay(tariff) {
+      const tg = Telegram.WebApp.initDataUnsafe;
+      const tg_id = tg?.user?.id || "testuser123"; // на проде убери fallback
+
+      const res = await fetch("https://platformvpn.ru/create-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tg_id, tariff })
+      });
+
+      const data = await res.json();
+      if (data.confirmation_url) {
+        window.location.href = data.confirmation_url;
+      } else {
+        alert("Ошибка: " + JSON.stringify(data));
+      }
+    }
+  </script>
 </body>
 </html>
