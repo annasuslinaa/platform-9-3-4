@@ -42,7 +42,7 @@
 
     async function pay(tariff) {
       const tg = Telegram.WebApp.initDataUnsafe;
-      const tg_id = tg?.user?.id
+      const tg_id = tg?.user?.id || "testuser1000";
       console.log("🧾 Отправка платежа", { tg_id, tariff });
       const res = await fetch("https://platformvpn.ru/create-payment", {
         method: "POST",
