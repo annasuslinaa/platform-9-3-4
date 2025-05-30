@@ -42,8 +42,8 @@
 
     async function pay(tariff) {
       const tg = Telegram.WebApp.initDataUnsafe;
-      const tg_id = tg?.user?.id || "testuser123"; // на проде убери fallback
-
+      const tg_id = tg?.user?.id
+      console.log("🧾 Отправка платежа", { tg_id, tariff });
       const res = await fetch("https://platformvpn.ru/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
