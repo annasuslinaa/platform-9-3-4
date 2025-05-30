@@ -37,8 +37,11 @@
 
     deviceBtn.addEventListener("click", async () => {
       // Указываем tg_id (в проде — получить из Telegram WebApp initData или cookie)
-      const tg_id = "testuser123";
-
+      const tg_id = Telegram.WebApp.initDataUnsafe?.user?.id;
+      if (!tg_id) {
+        alert("Не удалось получить Telegram ID");
+        return;
+    }
       try {
         const res = await fetch("https://platformvpn.ru/generate-key",{
           method: "POST",

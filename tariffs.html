@@ -41,8 +41,13 @@
     Telegram.WebApp.ready();
 
     async function pay(tariff) {
-      const tg = Telegram.WebApp.initDataUnsafe;
-      const tg_id = tg?.user?.id || "testuser1000";
+      let tg_id = Telegram.WebApp.initDataUnsafe?.user?.id;
+
+      if (!tg_id) {
+       console.warn("❗ Мини-приложение не в Telegram. Включен dev-режим.");
+       tg_id = "testuser-dev1000";
+      }
+
       console.log("🧾 Отправка платежа", { tg_id, tariff });
       const res = await fetch("https://platformvpn.ru/create-payment", {
         method: "POST",
